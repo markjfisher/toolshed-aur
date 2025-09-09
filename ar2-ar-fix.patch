@@ -1,0 +1,99 @@
+diff --git a/ar2/ar.c b/ar2/ar.c
+index 4d4c1638..6c0c5108 100644
+--- a/ar2/ar.c
++++ b/ar2/ar.c
+@@ -159,10 +159,10 @@ int		zflag = FALSE;			/* true if names come from stdin	*/
+ /*page*/
+ 
+ char	*emalloc(size_t);
++long	c4tol(char *cp);
++long	copy_to(FILE *ofp, FILE *ifp, HEADER *hp);
+ 
+-int main(argc, argv)
+-int		argc;
+-char	**argv;
++int main(int argc, char **argv)
+ 	{
+ 	char	command, *p, lc_suf[SUFSIZ + 1];
+ 	int		n, i;
+@@ -320,7 +320,7 @@ void proc_cmd(char command, FILE *afp)
+ 
+ void delete(FILE *afp)
+ 	{
+-	long	archive_size, ftell(), get_fsize();
++	long	archive_size;
+ 	FN		*fnp;
+ 	HEADER	header;
+ 	int		found;
+@@ -328,7 +328,7 @@ void delete(FILE *afp)
+ 	if (fnhead == NULL)
+ 		fatal(0, "No file(s) specified to delete\n", 0, 0);
+ 
+-	archive_size = get_fsize(fileno(afp));	/* current size of archive	*/
++	archive_size = ftell(afp);	/* current size of archive	*/
+ 
+ 	while ((gethdr(afp, &header)) != EOF)
+ 		{
+@@ -385,7 +385,7 @@ void extract(FILE *afp, int flag)
+ 	FILE	*ofp;						/* assume just listing			*/
+ 	HEADER	header;
+ 	FN		*fnp;
+-	FILE	*spl_open();
++	FILE	*spl_open(HEADER *hp);
+ 
+ 	if (fnhead == (FN *) NULL)
+ 		stash_name("*");				/* fake for special case		*/
+@@ -432,7 +432,7 @@ void table(FILE *fp)
+ 	{
+ 	HEADER	header;
+ 	FN		*fnp;
+-	long c4tol();
++	long c4tol(char *cp);
+ 	static char	*attrs[8] =
+ 		{"---", "--r", "-w-", "-wr", "e--", "e-r", "ew-", "ewr"};
+ 
+@@ -472,7 +472,7 @@ void update(FILE *afp)
+ 	HEADER	header;
+ 	FN		*fnp;
+ 	int		saved = 0;
+-	long	bytes, head_pos, tail_pos, copy_to(), c4tol();
++	long	bytes, head_pos, tail_pos;
+ 
+ 	while ((gethdr(afp, &header)) != EOF)
+ 		{
+@@ -711,13 +711,11 @@ int puthdr(FILE *fp, HEADER *hp)
+  * here we will recreate a tree that was collapsed into the archive file
+  */
+ 
+-FILE	*spl_open(hp)
+-HEADER	*hp;
++FILE	*spl_open(HEADER *hp)
+ 	{
+ 	char	buf[FNSIZ + 3];
+ 	FILE	*ofp;
+ 	char	*p;
+-	long	c4tol();
+ 
+ 	p = hp->a_name;
+ 	while ((p = strchr(p, '/')))
+@@ -793,9 +791,7 @@ void copy_from(FILE *ifp, FILE *ofp, HEADER *hp)
+  * copy an file to an archive
+  */
+ 
+-long	copy_to(ofp, ifp, hp)
+-FILE	*ofp, *ifp;
+-HEADER	*hp;
++long	copy_to(FILE *ofp, FILE *ifp, HEADER *hp)
+ 	{
+ 	long	bytes = 0;
+ 	int		byt;
+@@ -844,8 +840,7 @@ HEADER	*hp;
+  * get memory from the system or die trying
+  */
+ 
+-char	*emalloc(n)
+-size_t		n;
++char	*emalloc(size_t n)
+ 	{
+ 	char	*p;
+ 

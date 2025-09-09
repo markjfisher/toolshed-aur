@@ -1,0 +1,16 @@
+diff --git a/ar2/o2u.h b/ar2/o2u.h
+index 7e8bfc3a..6e08d0f1 100644
+--- a/ar2/o2u.h
++++ b/ar2/o2u.h
+@@ -51,7 +51,7 @@
+ #define NON_UNIX_FLAGS	(0x80|0x40)
+ #define CHARACTER_OF(C)	((char) ((C) & 0xff))
+ 
+-extern char		*u2oDate();
+-extern long		o2uDate();
+-extern char		u2oFmode();
+-extern short	o2uFmode();
++extern char		*u2oDate(time_t t);
++extern long		o2uDate(char *date);
++extern char		u2oFmode(mode_t mode);
++extern short	o2uFmode(char attr);
